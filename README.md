@@ -33,37 +33,40 @@ This repository contains:
 
 ### 1. Clone repo
 ```bash
-git clone https://github.com/Kobi-Okiti/fixnear.git
-cd fixnear
+    git clone "https://github.com/Kobi-Okiti/fixnear.git"
+    cd fixnear
+```
 
-2. Create .env files (per service)
+### 2. Create .env files (per service)
+    Example for the backend: backend/.env
+        PORT=5000
+        MONGO_URI=mongodb://localhost:27017/fixnear
+        JWT_SECRET=replace_with_a_strong_secret
 
-Example for the backend:
-backend/.env
+    Frontend .env example (admin-web and client-web):
+        VITE_API_URL=http://localhost:5000/api
 
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/fixnear
-JWT_SECRET=replace_with_a_strong_secret
+### 3. Install dependencies & run
+    Backend:
+    ```bash
+        cd backend
+        npm install
+        npm run dev
+    ```
 
-Frontend .env example (admin-web and client-web):
-VITE_API_URL=http://localhost:5000/api
+    Admin Web:
+    ```bash
+        cd ../admin-web
+        npm install
+        npm run dev
+    ```
 
-3. Install dependencies & run
-Backend:
-cd backend
-npm install
-npm run dev
-
-Admin Web:
-cd ../admin-web
-npm install
-npm run dev
-
-Client Web:
-cd ../client-web
-npm install
-npm run dev
-
+    Client Web:
+    ```bash
+        cd ../client-web
+        npm install
+        npm run dev
+    ```
 
 🧭 Project roadmap
 Phase 1 — Backend (TypeScript)
