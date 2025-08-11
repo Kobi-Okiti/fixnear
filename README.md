@@ -48,25 +48,19 @@ This repository contains:
 
 ### 3. Install dependencies & run
     Backend:
-    ```bash
         cd backend
         npm install
         npm run dev
-    ```
 
     Admin Web:
-    ```bash
         cd ../admin-web
         npm install
         npm run dev
-    ```
 
     Client Web:
-    ```bash
         cd ../client-web
         npm install
         npm run dev
-    ```
 
 ## 🧭 Project roadmap
 - **Phase 1 — Backend (TypeScript)**
@@ -95,7 +89,7 @@ This repository contains:
     Availability toggle for artisans
     Push notifications & location updates
 
-🧰 Developer notes
+## 🧰 Developer notes
     Each subfolder is a separate TypeScript project with its own node_modules/.
     Run npm install separately in each service folder.
     The .gitignore in the root ignores all node_modules and build outputs.
