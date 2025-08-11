@@ -68,26 +68,26 @@ This repository contains:
         npm run dev
     ```
 
-🧭 Project roadmap
-Phase 1 — Backend (TypeScript)
+## 🧭 Project roadmap
+- **Phase 1 — Backend (TypeScript)**
     Auth (User + Artisan)
     Artisan search by location & trade
     Emergency nearest artisan endpoint
     Reviews & ratings
     Admin routes
 
-Phase 2 — Admin Web
+- **Phase 2 — Admin Web**
     Manage artisans & users
     Approve/suspend artisans
     Reports & analytics
 
-Phase 3 — Client Web
+- **Phase 3 — Client Web**
     Registration & login
     Map & list view of artisans
     Emergency button
     Reviews flow
 
-Phase 4 — iOS App (SwiftUI)
+- **Phase 4 — iOS App (SwiftUI)**
     Authentication (signup/login + secure token storage)
     Nearby artisan search (map & list view)
     Emergency button (nearest artisans)
