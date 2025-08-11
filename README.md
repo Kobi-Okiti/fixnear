@@ -48,46 +48,40 @@ This repository contains:
 
 ### 3. Install dependencies & run
     Backend:
-    ```bash
         cd backend
         npm install
         npm run dev
-    ```
 
     Admin Web:
-    ```bash
         cd ../admin-web
         npm install
         npm run dev
-    ```
 
     Client Web:
-    ```bash
         cd ../client-web
         npm install
         npm run dev
-    ```
 
-🧭 Project roadmap
-Phase 1 — Backend (TypeScript)
+## 🧭 Project roadmap
+- **Phase 1 — Backend (TypeScript)**
     Auth (User + Artisan)
     Artisan search by location & trade
     Emergency nearest artisan endpoint
     Reviews & ratings
     Admin routes
 
-Phase 2 — Admin Web
+- **Phase 2 — Admin Web**
     Manage artisans & users
     Approve/suspend artisans
     Reports & analytics
 
-Phase 3 — Client Web
+- **Phase 3 — Client Web**
     Registration & login
     Map & list view of artisans
     Emergency button
     Reviews flow
 
-Phase 4 — iOS App (SwiftUI)
+- **Phase 4 — iOS App (SwiftUI)**
     Authentication (signup/login + secure token storage)
     Nearby artisan search (map & list view)
     Emergency button (nearest artisans)
@@ -95,7 +89,7 @@ Phase 4 — iOS App (SwiftUI)
     Availability toggle for artisans
     Push notifications & location updates
 
-🧰 Developer notes
+## 🧰 Developer notes
     Each subfolder is a separate TypeScript project with its own node_modules/.
     Run npm install separately in each service folder.
     The .gitignore in the root ignores all node_modules and build outputs.
