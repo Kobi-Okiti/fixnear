@@ -4,6 +4,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const User = require('../models/User');
 const roleMiddleware = require('../middleware/roleMiddleware');
+const bcrypt = require('bcryptjs');
 
 // GET /user/profile — protected route
 router.get('/profile', authMiddleware, async (req, res) => {

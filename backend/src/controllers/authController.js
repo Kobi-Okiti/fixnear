@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Register (User or Artisan)
 exports.register = async (req, res) => {
   try {
-    const { fullName, phone, email, password, role, tradeType } = req.body;
+    const { fullName, phone, email, password, role, tradeType, location } = req.body;
 
     // Validate required fields
     if (!fullName || !phone || !email || !password || !role) {

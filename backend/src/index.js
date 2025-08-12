@@ -6,6 +6,8 @@ const connectDB = require('./db');
 const authRoutes = require('./routes/auth');
 const userRoute = require('./routes/user');
 const artisanRoute = require('./routes/artisan');
+const authMiddleware = require('./middleware/authMiddleware');
+const roleMiddleware = require('./middleware/roleMiddleware');
 
 const app = express();
 
@@ -25,6 +27,10 @@ app.use('/artisan', artisanRoute);
 // Health check route
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'FixNear API is running ✅' });
+});
+
+app.get('/api/test-protected', authMiddleware, roleMiddleware('user', 'artisan'), (req, res) => {
+  res.json({ message: `Hello ${req.user.role} with ID ${req.user.id}, you are authorized!` });
 });
 
 const PORT = process.env.PORT || 3000;

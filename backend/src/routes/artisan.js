@@ -3,8 +3,9 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const Artisan = require('../models/Artisan');
 const roleMiddleware = require('../middleware/roleMiddleware');
+const bcrypt = require('bcryptjs');
 
-// GET /artisan/profile — Get logged-in artisan's profile
+// GET /artisan/profile — Get logged-in artisan profile
 router.get('/profile', authMiddleware, async (req, res) => {
   try {
     // Ensure only artisans can access
@@ -82,5 +83,92 @@ router.patch('/me', authMiddleware, roleMiddleware('artisan'), async (req, res) 
   }
 });
 
+// GET /artisan?trade=&lat=&lng= — search nearby artisans by trade and location
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const { trade, lat, lng, radius } = req.query;
+
+    if (!trade || !lat || !lng) {
+      return res.status(400).json({ message: 'trade, lat, and lng query parameters are required' });
+    }
+
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lng);
+    const radiusInKm = radius ? parseFloat(radius) : 10;
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return res.status(400).json({ message: 'lat and lng must be valid numbers' });
+    }
+
+    if (isNaN(radiusInKm)) {
+      return res.status(400).json({ message: 'radius must be a valid number' });
+    }
+
+    // Fetch artisans by trade and approved status
+    const artisans = await Artisan.find({ 
+      tradeType: trade, 
+      status: 'approved' 
+    });
+
+    console.log(`Found ${artisans.length} artisans for trade="${trade}" with status="approved"`);
+
+    // Helper function to calculate distance between two points (lat, lng)
+    const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+      const R = 6371; // Radius of the earth in km
+      const dLat = (lat2 - lat1) * (Math.PI / 180);
+      const dLon = (lon2 - lon1) * (Math.PI / 180);
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const d = R * c; // Distance in km
+      return d;
+    };
+
+    // Map artisans to include distance, filter by radius, then sort by distance ascending
+    const nearbyArtisansWithDistance = artisans
+      .map(artisan => {
+        if (!artisan.location || artisan.location.lat === undefined || artisan.location.lng === undefined) {
+          console.log(`Artisan ${artisan.fullName} has missing or invalid location data`);
+          return null;
+        }
+        const distance = getDistanceFromLatLonInKm(latitude, longitude, artisan.location.lat, artisan.location.lng);
+        console.log(`Artisan ${artisan.fullName} distance: ${distance.toFixed(2)} km`);
+        return { artisan, distance };
+      })
+      .filter(item => item !== null && item.distance <= radiusInKm)
+      .sort((a, b) => a.distance - b.distance);
+
+    console.log(`Found ${nearbyArtisansWithDistance.length} artisans within ${radiusInKm} km radius`);
+
+    // Prepare response: include distance in each artisan object
+    const response = nearbyArtisansWithDistance.map(({ artisan, distance }) => ({
+      ...artisan.toObject(),
+      distance
+    }));
+
+    res.json(response);
+
+  } catch (error) {
+    console.error('Error fetching nearby artisans:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+// GET /artisan/:id — get artisan profile by ID (public for logged-in users)
+router.get('/:id', authMiddleware, async (req, res) => {
+  try {
+    const artisan = await Artisan.findById(req.params.id).select('-passwordHash');
+    if (!artisan) {
+      return res.status(404).json({ message: 'Artisan not found' });
+    }
+    res.json(artisan);
+  } catch (error) {
+    console.error('Error fetching artisan by ID:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 module.exports = router;

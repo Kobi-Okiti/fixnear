@@ -19,10 +19,8 @@ const artisanSchema = new mongoose.Schema({
   isAvailable: { type: Boolean, default: false },
   rating: { type: Number, default: 0 },
   reviewCount: { type: Number, default: 0 },
-  reviews: [{ type: mongoose.Schema.Types.ObjectId }],
+  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' } ],
   status: { type: String, enum: ['pending', 'approved', 'suspended'], default: 'pending' },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Artisan', artisanSchema);
