@@ -6,6 +6,7 @@ const connectDB = require('./db');
 const authRoutes = require('./routes/auth');
 const userRoute = require('./routes/user');
 const artisanRoute = require('./routes/artisan');
+const reviewRoute = require('./routes/review')
 const authMiddleware = require('./middleware/authMiddleware');
 const roleMiddleware = require('./middleware/roleMiddleware');
 
@@ -22,6 +23,7 @@ connectDB();
 app.use('/auth', authRoutes);
 app.use('/user', userRoute);
 app.use('/artisan', artisanRoute);
+app.use('/review', reviewRoute);
 
 
 // Health check route

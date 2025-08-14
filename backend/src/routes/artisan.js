@@ -229,10 +229,19 @@ router.get('/:id', authMiddleware, async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: 'Invalid artisan ID' });
     }
-    const artisan = await Artisan.findById(req.params.id).select('-passwordHash');
+
+    const artisan = await Artisan.findById(req.params.id)
+      .select('-passwordHash -__v')
+      .populate({
+        path: 'reviews',
+        populate: { path: 'user', select: 'fullName' },
+        options: { sort: { createdAt: -1 } }
+      });
+
     if (!artisan) {
       return res.status(404).json({ message: 'Artisan not found' });
     }
+
     res.json(artisan);
   } catch (error) {
     console.error('Error fetching artisan by ID:', error);
