@@ -20,6 +20,7 @@ const artisanSchema = new mongoose.Schema({
   rating: { type: Number, default: 0 },
   reviewCount: { type: Number, default: 0 },
   reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' } ],
+  isSuspended: { type: Boolean, default: false },
   status: { type: String, enum: ['pending', 'approved', 'suspended'], default: 'pending' },
 }, { timestamps: true });
 

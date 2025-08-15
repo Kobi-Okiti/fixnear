@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const connectDB = require('./db');
 const authRoutes = require('./routes/auth');
+const adminAuthRoutes = require('./routes/admin');
 const userRoute = require('./routes/user');
 const artisanRoute = require('./routes/artisan');
 const reviewRoute = require('./routes/review')
@@ -21,6 +22,7 @@ connectDB();
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/admin', adminAuthRoutes);
 app.use('/user', userRoute);
 app.use('/artisan', artisanRoute);
 app.use('/review', reviewRoute);

@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const User = require('../models/User');
 const roleMiddleware = require('../middleware/roleMiddleware');
 const bcrypt = require('bcryptjs');
+const reportController = require('../controllers/reportController');
 
 // GET /user/profile — protected route
 router.get('/profile', authMiddleware, async (req, res) => {
@@ -43,5 +44,7 @@ router.patch('/me', authMiddleware, roleMiddleware('user'), async (req, res) => 
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+router.post('/report', authMiddleware, roleMiddleware('user'), reportController.createReport);
 
 module.exports = router;
