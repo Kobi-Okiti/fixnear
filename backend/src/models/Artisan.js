@@ -13,9 +13,16 @@ const artisanSchema = new mongoose.Schema({
     skillPhotoUrl: String
   },
   location: {
-    lat: Number,
-    lng: Number
+  type: {
+    type: String,
+    enum: ['Point'],
+    default: 'Point'
   },
+  coordinates: {
+    type: [Number], // [lng, lat]
+    required: true
+  }
+},
   isAvailable: { type: Boolean, default: false },
   rating: { type: Number, default: 0 },
   reviewCount: { type: Number, default: 0 },
@@ -23,5 +30,8 @@ const artisanSchema = new mongoose.Schema({
   isSuspended: { type: Boolean, default: false },
   status: { type: String, enum: ['pending', 'approved', 'suspended'], default: 'pending' },
 }, { timestamps: true });
+
+// Create 2dsphere index for geospatial queries
+artisanSchema.index({ location: '2dsphere' });
 
 module.exports = mongoose.model('Artisan', artisanSchema);

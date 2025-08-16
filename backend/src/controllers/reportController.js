@@ -1,10 +1,10 @@
 const Report = require('../models/Report');
 const User = require('../models/User');
 const Artisan = require('../models/Artisan');
+const asyncHandler = require("../middleware/asyncHandler");
 
 //creates a new report
-exports.createReport = async (req, res) => {
-  try {
+exports.createReport = asyncHandler(async (req, res) => {
     const { reportedArtisan, reason } = req.body;
     if (!reportedArtisan || !reason) {
       return res.status(400).json({ message: 'Artisan ID and reason are required' });
@@ -18,28 +18,19 @@ exports.createReport = async (req, res) => {
     });
 
     res.status(201).json(report);
-  } catch (error) {
-    console.error('Create report error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+});
 
 // admin get all reports
-exports.getReports = async (req, res) => {
-  try {
+exports.getReports = asyncHandler(async (req, res) => {
     const reports = await Report.find()
       .populate('reporter', 'fullName email')
       .populate('reportedArtisan', 'fullName tradeType');
     res.json(reports);
-  } catch (error) {
-    console.error('Get reports error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+
+});
 
 // updates report status with admin
-exports.updateReportStatus = async (req, res) => {
-  try {
+exports.updateReportStatus = asyncHandler(async (req, res) => {
     const { status } = req.body;
     if (!['pending', 'reviewed'].includes(status)) {
       return res.status(400).json({ message: 'Invalid status' });
@@ -54,29 +45,19 @@ exports.updateReportStatus = async (req, res) => {
     if (!report) return res.status(404).json({ message: 'Report not found' });
 
     res.json(report);
-  } catch (error) {
-    console.error('Update report status error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+});
 
 // delete report with admin
-exports.deleteReport = async (req, res) => {
-  try {
+exports.deleteReport = asyncHandler(async (req, res) => {
     const report = await Report.findByIdAndDelete(req.params.id);
     if (!report) {
       return res.status(404).json({ message: 'Report not found' });
     }
     res.json({ message: 'Report deleted successfully' });
-  } catch (error) {
-    console.error('Delete report error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+});
 
 // take action - suspend/unsuspend user or artisan
-exports.takeActionOnReport = async (req, res) => {
-  try {
+exports.takeActionOnReport = asyncHandler(async (req, res) => {
     const { targetType, action } = req.body; 
     // targetType: 'user' | 'artisan'
     // action: 'suspend' | 'unsuspend'
@@ -117,10 +98,6 @@ exports.takeActionOnReport = async (req, res) => {
       message: `${targetType} ${action === 'suspend' ? 'suspended' : 'unsuspended'} successfully`,
       updated
     });
-  } catch (error) {
-    console.error('Take action error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+});
 
 

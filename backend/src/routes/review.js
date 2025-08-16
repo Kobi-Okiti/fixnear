@@ -3,9 +3,10 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const Review = require('../models/Review');
 const Artisan = require('../models/Artisan');
+const roleMiddleware = require("../middleware/roleMiddleware");
+const asyncHandler = require("../middleware/asyncHandler");
 
-router.post('/', authMiddleware, async (req, res) => {
-  try {
+router.post('/', authMiddleware, roleMiddleware('user'), asyncHandler(async (req, res) => {
     const { artisanId, rating, comment } = req.body;
     const userId = req.user.id; 
 
@@ -41,15 +42,10 @@ router.post('/', authMiddleware, async (req, res) => {
       message: 'Review added successfully',
       review
     });
-  } catch (error) {
-    console.error('Error adding review:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+}));
 
 // GET reviews for a specific artisan
-router.get('/artisan/:id', async (req, res) => {
-  try {
+router.get('/artisan/:id', asyncHandler(async (req, res) => {
     const { id } = req.params;
 
     const reviews = await Review.find({ artisan: id })
@@ -57,10 +53,6 @@ router.get('/artisan/:id', async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.json(reviews);
-  } catch (error) {
-    console.error('Error fetching artisan reviews:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+}));
 
 module.exports = router;

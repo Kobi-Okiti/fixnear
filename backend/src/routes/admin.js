@@ -7,9 +7,9 @@ const validate = require('../utils/validate');
 const User = require('../models/User');
 const Artisan = require('../models/Artisan');
 const bcrypt = require('bcryptjs');
+const asyncHandler = require("../middleware/asyncHandler");
 
-router.post('/register', async (req, res) => {
-  try {
+router.post('/register', asyncHandler(async (req, res) => {
     const { fullName, phone, email, password } = req.body;
 
     const existing = await User.findOne({ email });
@@ -20,53 +20,66 @@ router.post('/register', async (req, res) => {
     await admin.save();
 
     res.json({ message: 'Admin created successfully', admin });
-  } catch (err) {
-    console.error('Admin register error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+
+}));
 
 router.post('/login', authController.adminLogin);
 
 // Get all users
-router.get('/users', adminMiddleware, async (req, res) => {
-  try {
+router.get('/users', adminMiddleware, asyncHandler(async (req, res) => {
     const users = await User.find().select('-passwordHash');
     res.json(users);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+}));
 
 // Get all artisans (optional filter)
-router.get('/artisans', adminMiddleware, validate.validateArtisanFilters, async (req, res) => {
-  try {
-    const query = {};
+router.get('/artisans', adminMiddleware, validate.validateArtisanFilters, asyncHandler(async (req, res) => {
+    const { status, tradeType, lat, lng, radius } = req.query;
 
-    // Optional filters
-    if (req.query.status) {
-      query.status = req.query.status;
-    }
-    if (req.query.tradeType) {
-      query.tradeType = req.query.tradeType;
-    }
-    if (req.query.lat && req.query.lng) {
-      query['location.lat'] = parseFloat(req.query.lat);
-      query['location.lng'] = parseFloat(req.query.lng);
+    const filters = {};
+    if (status) filters.status = status;
+    if (tradeType) filters.tradeType = tradeType;
+
+    // If lat/lng provided, use aggregation with $geoNear
+    if (lat && lng) {
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+      const radiusInKm = radius ? parseFloat(radius) : 20; // default 20km
+      const radiusInMeters = radiusInKm * 1000;
+
+      if ([latitude, longitude].some(isNaN)) {
+        return res.status(400).json({ message: 'lat and lng must be valid numbers' });
+      }
+
+      const artisans = await Artisan.aggregate([
+        {
+          $geoNear: {
+            near: { type: 'Point', coordinates: [longitude, latitude] },
+            distanceField: 'distance',
+            maxDistance: radiusInMeters,
+            spherical: true,
+            query: filters, // status/tradeType filters applied here
+          }
+        },
+        { $project: { passwordHash: 0 } },
+        { $sort: { distance: 1 } }
+      ]);
+
+      const response = artisans.map(a => ({
+        ...a,
+        distance: a.distance / 1000 // convert meters to km
+      }));
+
+      return res.json(response);
     }
 
-    const artisans = await Artisan.find(query).select('-passwordHash');
+    // If no lat/lng, fallback to normal query
+    const artisans = await Artisan.find(filters).select('-passwordHash');
     res.json(artisans);
-  } catch (error) {
-    console.error('Error fetching artisans:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+}));
+
 
 // Approve or suspend artisan
-router.patch('/artisans/:id/status', adminMiddleware, async (req, res) => {
-  try {
+router.patch('/artisans/:id/status', adminMiddleware, asyncHandler(async (req, res) => {
     const { status } = req.body;
     if (!['approved', 'suspended'].includes(status)) {
       return res.status(400).json({ message: 'Invalid status value' });
@@ -83,11 +96,7 @@ router.patch('/artisans/:id/status', adminMiddleware, async (req, res) => {
     }
 
     res.json(artisan);
-  } catch (error) {
-    console.error('Error updating artisan status:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+}));
 
 // Reports
 router.get('/reports', adminMiddleware, reportController.getReports);

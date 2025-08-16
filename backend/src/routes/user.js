@@ -6,24 +6,21 @@ const User = require('../models/User');
 const roleMiddleware = require('../middleware/roleMiddleware');
 const bcrypt = require('bcryptjs');
 const reportController = require('../controllers/reportController');
+const asyncHandler = require("../middleware/asyncHandler");
 
 // GET /user/profile — protected route
-router.get('/profile', authMiddleware, async (req, res) => {
-  try {
+router.get('/profile', authMiddleware, asyncHandler(async (req, res) => {
+
     const user = await User.findById(req.user.id).select('-passwordHash');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     res.json(user);
-  } catch (error) {
-    console.error('Profile error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+
+}));
 
 // PATCH /me — User profile update
-router.patch('/me', authMiddleware, roleMiddleware('user'), async (req, res) => {
-  try {
+router.patch('/me', authMiddleware, roleMiddleware('user'), asyncHandler(async (req, res) => {
     const updates = {};
     const { fullName, phone, email, location, password } = req.body;
 
@@ -39,11 +36,7 @@ router.patch('/me', authMiddleware, roleMiddleware('user'), async (req, res) => 
     const updatedUser = await User.findByIdAndUpdate(req.user.id, updates, { new: true });
 
     res.json(updatedUser);
-  } catch (err) {
-    console.error('Update user error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+}));
 
 router.post('/report', authMiddleware, roleMiddleware('user'), reportController.createReport);
 
