@@ -31,6 +31,30 @@ router.get('/users', adminMiddleware, asyncHandler(async (req, res) => {
     res.json(users);
 }));
 
+// Suspend or unsuspend user directly
+router.patch('/users/:id/status', adminMiddleware, asyncHandler(async (req, res) => {
+  const { isSuspended } = req.body;
+
+  if (typeof isSuspended !== 'boolean') {
+    return res.status(400).json({ message: 'isSuspended must be true or false' });
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { isSuspended },
+    { new: true }
+  ).select('-passwordHash');
+
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  res.json({
+    message: `User has been ${isSuspended ? 'suspended' : 'unsuspended'} successfully`,
+    user,
+  });
+}));
+
 // Get all artisans (optional filter)
 router.get('/artisans', adminMiddleware, validate.validateArtisanFilters, asyncHandler(async (req, res) => {
     const { status, tradeType, lat, lng, radius } = req.query;
@@ -76,7 +100,6 @@ router.get('/artisans', adminMiddleware, validate.validateArtisanFilters, asyncH
     const artisans = await Artisan.find(filters).select('-passwordHash');
     res.json(artisans);
 }));
-
 
 // Approve or suspend artisan
 router.patch('/artisans/:id/status', adminMiddleware, asyncHandler(async (req, res) => {
