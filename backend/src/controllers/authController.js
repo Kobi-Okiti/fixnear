@@ -3,8 +3,25 @@ const Artisan = require("../models/Artisan");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("../middleware/asyncHandler");
+const axios = require("axios");
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2`;
+    const { data } = await axios.get(url, {
+      headers: {
+        "Accept-Language": "en",
+        "User-Agent": "fixnear-dashboard",
+      },
+    });
+    return data.address || "";
+  } catch (err) {
+    console.error("Reverse geocoding failed:", err.message);
+    return "";
+  }
+}
 
 // Register (User or Artisan)
 exports.register = asyncHandler(async (req, res) => {
@@ -52,11 +69,17 @@ exports.register = asyncHandler(async (req, res) => {
     }
 
     let geoLocation = undefined;
+    let readableAddress = "";
+
     if (location && location.lat !== undefined && location.lng !== undefined) {
       geoLocation = {
         type: "Point",
         coordinates: [location.lng, location.lat],
       };
+      console.time("reverseGeocode");
+      readableAddress = await reverseGeocode(location.lat, location.lng);
+      console.timeEnd("reverseGeocode");
+      console.log("Resolved address:", readableAddress);
     }
 
     const artisan = new Artisan({
@@ -69,6 +92,7 @@ exports.register = asyncHandler(async (req, res) => {
       status: "pending",
       isAvailable: false,
       ...(geoLocation && { location: geoLocation }),
+      ...(readableAddress && { readableAddress }),
     });
 
     await artisan.save();

@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import api from "../../services/api";
 import { Button } from "../ui/button";
+// import DisplayLocation from "./displayLocationUser";
 
 export type UserManagementType = {
   _id: string;
@@ -12,6 +13,10 @@ export type UserManagementType = {
   phone: string;
   email: string;
   isSuspended: boolean;
+  location: {
+    lat: number;
+    lng: number;
+  };
 };
 
 export const columns = (
@@ -72,6 +77,18 @@ export const columns = (
       </p>
     ),
   },
+//   {
+//     accessorKey: "location",
+//     header: "Location",
+//     cell: ({ row }) => {
+//       const coords = row.original.location;
+//       return (
+//         <div className="max-w-[150px] whitespace-normal break-words">
+//           <DisplayLocation coordinates={coords} />
+//         </div>
+//       );
+//     },
+//   },
   {
     id: "actions",
     header: "Action",

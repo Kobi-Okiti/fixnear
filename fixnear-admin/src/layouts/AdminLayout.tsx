@@ -18,9 +18,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     navigate("/login", { replace: true });
   };
   return (
-    <SidebarProvider className="w-screen h-screen flex flex-row">
+    <SidebarProvider className="w-screen h-full flex flex-row">
       <AppSidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 h-full flex flex-col">
         <nav className="bg-gray-800 shadow p-4 flex justify-between items-center">
           <span className="text-white">Welcome, {admin?.fullName ?? "Admin"}</span>
           <Button onClick={handleLogout} className="!bg-red-600">Logout</Button>

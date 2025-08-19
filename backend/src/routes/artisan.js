@@ -6,6 +6,24 @@ const roleMiddleware = require("../middleware/roleMiddleware");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const asyncHandler = require("../middleware/asyncHandler");
+const axios = require("axios");
+
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2`;
+    const { data } = await axios.get(url, {
+      headers: {
+        "Accept-Language": "en",
+        "User-Agent": "fixnear-dashboard",
+      },
+    });
+    return data.address || "";
+  } catch (err) {
+    console.error("Reverse geocoding failed:", err.message);
+    return "";
+  }
+}
 
 // GET /artisan?trade=&lat=&lng= — search nearby artisans by trade and location
 router.get(
@@ -130,64 +148,69 @@ router.patch(
   authMiddleware,
   roleMiddleware("artisan"),
   asyncHandler(async (req, res) => {
-      const updates = {};
-      const {
-        fullName,
-        phone,
-        email,
-        location,
-        password,
-        tradeType,
-        profilePhoto,
-        documents,
-        isAvailable,
-      } = req.body;
+    const updates = {};
+    const {
+      fullName,
+      phone,
+      email,
+      location,
+      password,
+      tradeType,
+      profilePhoto,
+      documents,
+      isAvailable,
+    } = req.body;
 
-      if (fullName) updates.fullName = fullName;
-      if (phone) updates.phone = phone;
-      if (email) updates.email = email;
-      if (tradeType) updates.tradeType = tradeType;
-      if (profilePhoto) updates.profilePhoto = profilePhoto;
+    if (fullName) updates.fullName = fullName;
+    if (phone) updates.phone = phone;
+    if (email) updates.email = email;
+    if (tradeType) updates.tradeType = tradeType;
+    if (profilePhoto) updates.profilePhoto = profilePhoto;
 
-      if (documents && (documents.idCardUrl || documents.skillPhotoUrl)) {
-        updates.documents = {};
-        if (documents.idCardUrl)
-          updates.documents.idCardUrl = documents.idCardUrl;
-        if (documents.skillPhotoUrl)
-          updates.documents.skillPhotoUrl = documents.skillPhotoUrl;
+    if (documents && (documents.idCardUrl || documents.skillPhotoUrl)) {
+      updates.documents = {};
+      if (documents.idCardUrl)
+        updates.documents.idCardUrl = documents.idCardUrl;
+      if (documents.skillPhotoUrl)
+        updates.documents.skillPhotoUrl = documents.skillPhotoUrl;
+    }
+
+    if (location && location.lat !== undefined && location.lng !== undefined) {
+      updates.location = {
+        type: "Point",
+        coordinates: [location.lng, location.lat],
+      };
+
+      const readableAddress = await reverseGeocode(location.lat, location.lng);
+      if (readableAddress) {
+        updates.readableAddress = readableAddress; // store entire object
       }
+    }
 
-      if (
-        location &&
-        location.lat !== undefined &&
-        location.lng !== undefined
-      ) {
-        updates.location = {
-          type: "Point",
-          coordinates: [location.lng, location.lat],
-        };
-      }
+    if (typeof isAvailable === "boolean") updates.isAvailable = isAvailable;
 
-      if (typeof isAvailable === "boolean") updates.isAvailable = isAvailable;
+    if (password) {
+      updates.passwordHash = await bcrypt.hash(password, 10);
+    }
 
-      if (password) {
-        updates.passwordHash = await bcrypt.hash(password, 10);
-      }
+    updates.updatedAt = Date.now();
 
-      updates.updatedAt = Date.now();
+    const updatedArtisan = await Artisan.findByIdAndUpdate(
+      req.user.id,
+      { $set: updates },
+      { new: true }
+    );
 
-      const updatedArtisan = await Artisan.findByIdAndUpdate(
-        req.user.id,
-        { $set: updates },
-        { new: true }
-      );
-
-      res.json(updatedArtisan);
-  }
-));
+    res.json(updatedArtisan);
+  })
+);
 
 // GET /artisan/:id — get artisan profile by ID (public for logged-in users)
-router.get("/:id", authMiddleware, roleMiddleware('user', 'admin'), asyncHandler(async (req, res) => {
+router.get(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("user", "admin"),
+  asyncHandler(async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: "Invalid artisan ID" });
     }
@@ -205,6 +228,7 @@ router.get("/:id", authMiddleware, roleMiddleware('user', 'admin'), asyncHandler
     }
 
     res.json(artisan);
-}));
+  })
+);
 
 module.exports = router;

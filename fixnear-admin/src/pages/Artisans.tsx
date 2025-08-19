@@ -1,3 +1,7 @@
+import ArtisanManagement from "../components/artisan-management/artisan-management";
+
 export default function ArtisansPage() {
-  return <h1>Artisans</h1>;
+  return (
+    <ArtisanManagement />
+  );
 }
