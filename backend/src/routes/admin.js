@@ -127,4 +127,3 @@ router.patch('/reports/:id/status', adminMiddleware, reportController.updateRepo
 router.delete('/reports/:id', adminMiddleware, reportController.deleteReport);
 router.patch('/reports/:id/action', adminMiddleware, validate.validateSuspendBody, reportController.takeActionOnReport);
 module.exports = router;
- 

@@ -1,103 +1,116 @@
-const Report = require('../models/Report');
-const User = require('../models/User');
-const Artisan = require('../models/Artisan');
+const Report = require("../models/Report");
+const User = require("../models/User");
+const Artisan = require("../models/Artisan");
 const asyncHandler = require("../middleware/asyncHandler");
 
 //creates a new report
 exports.createReport = asyncHandler(async (req, res) => {
-    const { reportedArtisan, reason } = req.body;
-    if (!reportedArtisan || !reason) {
-      return res.status(400).json({ message: 'Artisan ID and reason are required' });
-    }
+  const { reportedArtisan, reason } = req.body;
+  if (!reportedArtisan || !reason) {
+    return res
+      .status(400)
+      .json({ message: "Artisan ID and reason are required" });
+  }
 
-    const report = await Report.create({
-      reporter: req.user.id,
-      reportedArtisan,
-      reason,
-      status: 'pending'
-    });
+  const report = await Report.create({
+    reporter: req.user.id,
+    reportedArtisan,
+    reason,
+    status: "pending",
+  });
 
-    res.status(201).json(report);
+  res.status(201).json(report);
 });
 
 // admin get all reports
 exports.getReports = asyncHandler(async (req, res) => {
-    const reports = await Report.find()
-      .populate('reporter', 'fullName email')
-      .populate('reportedArtisan', 'fullName tradeType');
-    res.json(reports);
-
+  const reports = await Report.find()
+    .populate("reporter", "fullName email")
+    .populate("reportedArtisan", "fullName tradeType");
+  res.json(reports);
 });
 
 // updates report status with admin
 exports.updateReportStatus = asyncHandler(async (req, res) => {
-    const { status } = req.body;
-    if (!['pending', 'reviewed'].includes(status)) {
-      return res.status(400).json({ message: 'Invalid status' });
-    }
+  const { status } = req.body;
+  if (!["pending", "reviewed"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
 
-    const report = await Report.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
+  const report = await Report.findByIdAndUpdate(
+    req.params.id,
+    { status },
+    { new: true }
+  );
 
-    if (!report) return res.status(404).json({ message: 'Report not found' });
+  if (!report) return res.status(404).json({ message: "Report not found" });
 
-    res.json(report);
+  res.json(report);
 });
 
 // delete report with admin
 exports.deleteReport = asyncHandler(async (req, res) => {
-    const report = await Report.findByIdAndDelete(req.params.id);
-    if (!report) {
-      return res.status(404).json({ message: 'Report not found' });
-    }
-    res.json({ message: 'Report deleted successfully' });
+  const report = await Report.findByIdAndDelete(req.params.id);
+  if (!report) {
+    return res.status(404).json({ message: "Report not found" });
+  }
+  res.json({ message: "Report deleted successfully" });
 });
 
 // take action - suspend/unsuspend user or artisan
 exports.takeActionOnReport = asyncHandler(async (req, res) => {
-    const { targetType, action } = req.body; 
-    // targetType: 'user' | 'artisan'
-    // action: 'suspend' | 'unsuspend'
+  const { targetType, action } = req.body;
+  // targetType: 'user' | 'artisan'
+  // action: 'suspend' | 'unsuspend'
 
-    const report = await Report.findById(req.params.id);
-    if (!report) {
-      return res.status(404).json({ message: 'Report not found' });
-    }
+  const report = await Report.findById(req.params.id);
+  if (!report) {
+    return res.status(404).json({ message: "Report not found" });
+  }
 
-    let targetModel;
-    let targetId;
+  let targetModel;
+  let targetId;
 
-    if (targetType === 'user') {
-      targetModel = User;
-      targetId = report.reporter; // or reported user if that ever exists
-    } else if (targetType === 'artisan') {
-      targetModel = Artisan;
-      targetId = report.reportedArtisan;
-    } else {
-      return res.status(400).json({ message: 'Invalid targetType' });
-    }
+  if (targetType === "user") {
+    targetModel = User;
+    targetId = report.reporter; // or reported user if that ever exists
+  } else if (targetType === "artisan") {
+    targetModel = Artisan;
+    targetId = report.reportedArtisan;
+  } else {
+    return res.status(400).json({ message: "Invalid targetType" });
+  }
 
-    if (!targetId) {
-      return res.status(400).json({ message: 'No target ID in this report' });
-    }
+  if (!targetId) {
+    return res.status(400).json({ message: "No target ID in this report" });
+  }
 
-    const updated = await targetModel.findByIdAndUpdate(
-      targetId,
-      { isSuspended: action === 'suspend' },
-      { new: true }
-    );
+  let updateFields = {};
 
-    if (!updated) {
-      return res.status(404).json({ message: 'Target not found' });
-    }
+  if (targetType === "user") {
+    updateFields.isSuspended = action === "suspend";
+  } else if (targetType === "artisan") {
+    updateFields.status = action === "suspend" ? "suspended" : "approved";
+  }
 
-    res.json({
-      message: `${targetType} ${action === 'suspend' ? 'suspended' : 'unsuspended'} successfully`,
-      updated
-    });
+  const updated = await targetModel.findByIdAndUpdate(
+    targetId,
+    updateFields,
+    { new: true }
+  );
+
+  if (!updated) {
+    return res.status(404).json({ message: "Target not found" });
+  }
+
+  report.status = "reviewed";
+  await report.save();
+
+  res.json({
+    message: `${targetType} ${
+      action === "suspend" ? "suspended" : "unsuspended"
+    } successfully`,
+    report,
+    updated,
+  });
 });
-
-
