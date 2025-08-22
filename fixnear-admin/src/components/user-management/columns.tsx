@@ -3,7 +3,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import api from "../../services/api";
 import { Button } from "../ui/button";
-// import DisplayLocation from "./displayLocationUser";
 
 export type UserManagementType = {
   _id: string;

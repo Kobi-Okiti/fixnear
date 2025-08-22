@@ -8,8 +8,6 @@ const adminAuthRoutes = require('./routes/admin');
 const userRoute = require('./routes/user');
 const artisanRoute = require('./routes/artisan');
 const reviewRoute = require('./routes/review')
-// const authMiddleware = require('./middleware/authMiddleware');
-// const roleMiddleware = require('./middleware/roleMiddleware');
 
 const app = express();
 
@@ -27,15 +25,6 @@ app.use('/user', userRoute);
 app.use('/artisan', artisanRoute);
 app.use('/review', reviewRoute);
 
-
-// Health check route
-// app.get('/api/health', (req, res) => {
-//   res.json({ status: 'OK', message: 'FixNear API is running ✅' });
-// });
-
-// app.get('/api/test-protected', authMiddleware, roleMiddleware('user', 'artisan'), (req, res) => {
-//   res.json({ message: `Hello ${req.user.role} with ID ${req.user.id}, you are authorized!` });
-// });
 
 app.use((err, req, res, next) => {
   console.error('Global error handler:', err);
