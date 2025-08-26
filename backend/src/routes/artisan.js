@@ -8,7 +8,6 @@ const mongoose = require("mongoose");
 const asyncHandler = require("../middleware/asyncHandler");
 const axios = require("axios");
 
-
 async function reverseGeocode(lat, lon) {
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2`;
@@ -72,6 +71,15 @@ router.get(
     }));
 
     res.json(response);
+  })
+);
+
+router.get(
+  "/getAll",
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const artisans = await Artisan.find().select("-passwordHash");
+    res.json(artisans);
   })
 );
 
@@ -209,7 +217,6 @@ router.patch(
 router.get(
   "/:id",
   authMiddleware,
-  roleMiddleware("user", "admin"),
   asyncHandler(async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: "Invalid artisan ID" });

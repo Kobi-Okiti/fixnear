@@ -45,7 +45,7 @@ router.post('/', authMiddleware, roleMiddleware('user'), asyncHandler(async (req
 }));
 
 // GET reviews for a specific artisan
-router.get('/artisan/:id', asyncHandler(async (req, res) => {
+router.get('/artisan/:id', authMiddleware, asyncHandler(async (req, res) => {
     const { id } = req.params;
 
     const reviews = await Review.find({ artisan: id })

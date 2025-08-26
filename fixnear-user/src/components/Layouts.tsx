@@ -13,7 +13,7 @@ export default function Layout() {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col items-start justify-between">
+    <div className="min-h-screen w-screen flex flex-col items-start justify-between">
       <header className="bg-gray-100 p-4 shadow h-max w-full">
         <nav className="flex gap-4 items-center">
           <p>Welcome, {user?.fullName ?? "User"} </p>
@@ -24,7 +24,7 @@ export default function Layout() {
         </nav>
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 p-6">
         <Outlet />
       </main>
 
