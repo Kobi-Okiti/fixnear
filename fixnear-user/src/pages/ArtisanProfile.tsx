@@ -1,34 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
-
-type Artisan = {
-  _id: string;
-  fullName: string;
-  tradeType: string;
-  profilePhoto?: string;
-  phone: string;
-  rating: number;
-  reviewCount: number;
-  createdAt?: string;
-  readableAddress?: {
-    amenity?: string;
-    road?: string;
-    county?: string;
-    state?: string;
-    postcode?: string;
-    country?: string;
-    country_code?: string;
-  };
-};
-
-type Review = {
-  _id: string;
-  user: { fullName: string };
-  rating: number;
-  comment?: string;
-  createdAt: string;
-};
+import { Artisan, Review } from "../types/artisan";
+import ReviewCard from "@/components/ReviewCard";
 
 export default function ArtisanProfile() {
   const { id } = useParams<{ id: string }>();
@@ -112,18 +86,7 @@ export default function ArtisanProfile() {
           <p>No reviews yet.</p>
         ) : (
           reviews.map((review) => (
-            <div key={review._id} className="border-b pb-3 mb-3">
-              <div className="flex justify-between">
-                <p className="font-bold">{review.user.fullName}</p>
-                <p>{review.rating} ★</p>
-              </div>
-              {review.comment && (
-                <p className="mt-1 text-gray-700">{review.comment}</p>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                {new Date(review.createdAt).toLocaleDateString()}
-              </p>
-            </div>
+            <ReviewCard key={review._id} review={review} />
           ))
         )}
       </div>

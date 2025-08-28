@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { fetchAllArtisans } from "../services/api/artisans";
 import { Artisan } from "../types/artisan";
-import { useNavigate } from "react-router-dom";
+import ArtisanCard from "@/components/ArtisanCard";
+import ArtisanMap from "@/components/ArtisanMap";
+import { useGeolocation } from "@/hooks/useGeolocation";
+
 
 export default function Home() {
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const { coords: userCoords } = useGeolocation();
+
 
   useEffect(() => {
     fetchAllArtisans()
@@ -20,28 +24,16 @@ export default function Home() {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="space-y-4">
-      {artisans.map((artisan) => {
-        const addr = artisan.readableAddress;
-          const addressString = addr
-            ? [addr.road, addr.county, addr.state, addr.country]
-                .filter(Boolean)
-                .join(", ")
-            : "Location not available";
-        return(
-        <div
-          key={artisan._id}
-          onClick={() => navigate(`/artisan/${artisan._id}`)}
-          className="border p-4 rounded my-2 cursor-pointer hover:bg-gray-100 transition"
-        >
-          <p className="font-bold">{artisan.fullName}</p>
-          <p>{artisan.tradeType}</p>
-          <p>
-            {artisan.rating} ★ ({artisan.reviewCount} reviews)
-          </p>
-          <p>{addressString}</p>
-        </div>
-      )})}
+    <div className="w-full flex flex-row gap-4">
+      <div className="space-y-4">
+        {artisans.map((artisan) => (
+          <ArtisanCard key={artisan._id} artisan={artisan} />
+        ))}
+      </div>
+      <div className="space-y-4">
+    <h2 className="text-lg font-bold mb-2">View on Map</h2>
+    <ArtisanMap artisans={artisans} userCoords={userCoords || undefined}  />
+  </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ export type Artisan = {
   role: "artisan";
   tradeType: string;
   profilePhoto?: string;
+  createdAt: string;
   documents?: {
     idCardUrl?: string;
     skillPhotoUrl?: string;
@@ -25,8 +26,16 @@ export type Artisan = {
   };
   rating: number;
   reviewCount: number;
-  reviews?: string[]; // Change to Review[] if you fetch populated reviews later
+  reviews?: Review[];
   isSuspended: boolean;
   status: "pending" | "approved" | "suspended";
   distance?: number; // Only from /artisans query
+};
+
+export type Review = {
+  _id: string;
+  user: { fullName: string };
+  rating: number;
+  comment?: string;
+  createdAt: string;
 };

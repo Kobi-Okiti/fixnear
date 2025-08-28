@@ -5,6 +5,8 @@ import { BrowserRouter } from "react-router-dom";
 import AppRouter from "./Router.tsx";
 import { AuthProvider } from "./context/authContext.tsx";
 import { Toaster } from "sonner";
+import 'leaflet/dist/leaflet.css';
+
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
