@@ -1,12 +1,11 @@
-import { Link, Outlet, useNavigate } from "react-router-dom"
-import { Button } from "./ui/button"
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
 import { useAuth } from "@/context/useAuth";
 
 export default function Layout() {
-
-  const { logout, user  } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
-  
+
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
@@ -20,7 +19,15 @@ export default function Layout() {
           <Link to="/">Home</Link>
           <Link to="/artisans">Artisans</Link>
           <Link to="/profile">Profile</Link>
-          <Button onClick={handleLogout} className="!bg-red-600">Logout</Button>
+          <Button
+            onClick={() => navigate("/emergency")}
+            className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
+          >
+            Need Urgent Help
+          </Button>
+          <Button onClick={handleLogout} className="!bg-red-600">
+            Logout
+          </Button>
         </nav>
       </header>
 
@@ -32,5 +39,5 @@ export default function Layout() {
         © 2025 FixNear
       </footer>
     </div>
-  )
+  );
 }

@@ -8,6 +8,7 @@ import Artisans from "./pages/Artisans";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/Login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import Emergency from "./pages/Emergency";
 
 export default function AppRouter() {
   return (
@@ -36,6 +37,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute>
               <Artisans />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="emergency"
+          element={
+            <ProtectedRoute>
+              <Emergency />
             </ProtectedRoute>
           }
         />

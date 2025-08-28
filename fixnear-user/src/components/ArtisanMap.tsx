@@ -1,4 +1,5 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useEffect, useState } from "react";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -30,25 +31,43 @@ const artisanIcon = new L.Icon({
 
 interface ArtisanMapProps {
   artisans: Artisan[];
-  userCoords?: { lat: number; lng: number }; // added to show user location
+  userCoords?: { lat: number; lng: number };
+}
+
+// Helper component to force recenter
+function RecenterMap({ center }: { center: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center);
+  }, [center, map]);
+  return null;
 }
 
 export default function ArtisanMap({ artisans, userCoords }: ArtisanMapProps) {
   const navigate = useNavigate();
   const defaultCenter: [number, number] = [6.5244, 3.3792];
   const firstLocation = artisans[0]?.location?.coordinates;
-  const center: [number, number] = userCoords
-    ? [userCoords.lat, userCoords.lng]
-    : firstLocation
-    ? [firstLocation[1], firstLocation[0]]
-    : defaultCenter;
+
+  const [mapCenter, setMapCenter] = useState<[number, number]>(defaultCenter);
+
+  useEffect(() => {
+    if (userCoords) {
+      setMapCenter([userCoords.lat, userCoords.lng]);
+    } else if (firstLocation) {
+      setMapCenter([firstLocation[1], firstLocation[0]]);
+    } else {
+      setMapCenter(defaultCenter);
+    }
+  }, [userCoords, firstLocation]);
 
   return (
     <MapContainer
-      center={center}
+      center={mapCenter}
       zoom={13}
       style={{ height: "500px", width: "500px" }}
     >
+      <RecenterMap center={mapCenter} />
+
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; OpenStreetMap contributors"
@@ -56,10 +75,7 @@ export default function ArtisanMap({ artisans, userCoords }: ArtisanMapProps) {
 
       {/* User marker */}
       {userCoords && (
-        <Marker
-          position={[userCoords.lat, userCoords.lng]}
-          icon={userIcon}
-        >
+        <Marker position={[userCoords.lat, userCoords.lng]} icon={userIcon}>
           <Popup>You are here</Popup>
         </Marker>
       )}
