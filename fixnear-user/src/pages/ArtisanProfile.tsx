@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
 import { Artisan, Review } from "../types/artisan";
 import ReviewCard from "@/components/ReviewCard";
+import ReviewForm from "@/components/ReviewForm";
 
 export default function ArtisanProfile() {
   const { id } = useParams<{ id: string }>();
@@ -14,29 +15,31 @@ export default function ArtisanProfile() {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const refreshArtisan = useCallback(() => {
     if (!id) return;
-
     setLoading(true);
     api
       .get<Artisan>(`/artisan/${id}`)
       .then((res) => setArtisan(res.data))
-      .catch((err) => {
-        console.error(err);
-        setError("Failed to fetch artisan profile.");
-      })
+      .catch(() => setError("Failed to fetch artisan profile."))
       .finally(() => setLoading(false));
+  }, [id]);
 
+  const refreshReviews = useCallback(() => {
+    if (!id) return;
     setReviewsLoading(true);
     api
       .get<Review[]>(`/review/artisan/${id}`)
       .then((res) => setReviews(res.data))
-      .catch((err) => {
-        console.error(err);
-        setReviewsError("Failed to fetch reviews.");
-      })
+      .catch(() => setReviewsError("Failed to fetch reviews."))
       .finally(() => setReviewsLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    refreshArtisan();
+    refreshReviews();
+  }, [refreshArtisan, refreshReviews]);
+
 
   if (loading) return <p>Loading artisan profile...</p>;
   if (error) return <p>{error}</p>;
@@ -90,6 +93,10 @@ export default function ArtisanProfile() {
           ))
         )}
       </div>
+      <ReviewForm artisanId={artisan._id} onReviewAdded={() => {
+        refreshReviews();
+        refreshArtisan();
+      }} />
     </div>
   );
 }
