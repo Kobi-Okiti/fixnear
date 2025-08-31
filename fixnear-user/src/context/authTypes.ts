@@ -4,6 +4,7 @@ export type User = {
   fullName: string;
   email: string;
   role: "user";
+  phone: string
 };
 
 export type AuthState = {
