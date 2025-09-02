@@ -112,7 +112,7 @@ export default function LoginPage() {
         </Form>
 
         <p className="mt-3">
-          Don't have an account? <Link to="/signup">Create Account</Link>
+          Don't have an account? <Link to="/register">Create Account</Link>
         </p>
       </div>
     </div>
