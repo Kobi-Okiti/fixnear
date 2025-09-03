@@ -17,7 +17,7 @@ export default function Layout() {
         <nav className="flex gap-4 items-center">
           <p>Welcome, {artisan?.fullName ?? "User"} </p>
           <Link to="/profile">Profile</Link>
-          <Link to="/">Reviews</Link>
+          <Link to="/review">Reviews</Link>
           <Button onClick={handleLogout} className="!bg-red-600">
             Logout
           </Button>

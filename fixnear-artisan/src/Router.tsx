@@ -5,6 +5,7 @@ import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/Login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import SignUp from "./pages/SignUp";
+import ArtisanReviewsPage from "./pages/Reviews";
 
 export default function AppRouter() {
   return (
@@ -17,6 +18,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="review"
+          element={
+            <ProtectedRoute>
+              <ArtisanReviewsPage />
             </ProtectedRoute>
           }
         />
