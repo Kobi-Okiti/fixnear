@@ -9,6 +9,7 @@ const artisanSchema = new mongoose.Schema(
     role: { type: String, enum: ["artisan"], default: "artisan" },
     tradeType: { type: String, required: true },
     profilePhoto: String,
+    bio: { type: String, default: "" },
     documents: {
       idCardUrl: String,
       skillPhotoUrl: String,
@@ -34,7 +35,7 @@ const artisanSchema = new mongoose.Schema(
       country: String,
       country_code: String,
     },
-    // isAvailable: { type: Boolean, default: false },
+    isAvailable: { type: Boolean, default: false },
     rating: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],

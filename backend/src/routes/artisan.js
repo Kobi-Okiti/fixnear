@@ -167,6 +167,7 @@ router.patch(
       profilePhoto,
       documents,
       isAvailable,
+      bio,
     } = req.body;
 
     if (fullName) updates.fullName = fullName;
@@ -174,6 +175,7 @@ router.patch(
     if (email) updates.email = email;
     if (tradeType) updates.tradeType = tradeType;
     if (profilePhoto) updates.profilePhoto = profilePhoto;
+    if (bio) updates.bio = bio;
 
     if (documents && (documents.idCardUrl || documents.skillPhotoUrl)) {
       updates.documents = {};

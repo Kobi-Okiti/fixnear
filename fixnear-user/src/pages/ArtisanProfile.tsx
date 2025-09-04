@@ -95,7 +95,6 @@ export default function ArtisanProfile() {
       </div>
       <ReviewForm artisanId={artisan._id} onReviewAdded={() => {
         refreshReviews();
-        refreshArtisan();
       }} />
     </div>
   );

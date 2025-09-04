@@ -4,7 +4,24 @@ export type Artisan = {
   fullName: string;
   email: string;
   role: "artisan";
-  phone: string
+  phone: string;
+  tradeType: string;
+  bio: string;
+  createdAt: string;
+  readableAddress?: {
+    amenity?: string;
+    road?: string;
+    county?: string;
+    state?: string;
+    postcode?: string;
+    country?: string;
+    country_code?: string;
+  };
+  rating: number;
+  reviewCount: number;
+  isSuspended: boolean;
+  status: "pending" | "approved" | "suspended";
+  isAvailable: boolean;
 };
 
 export type AuthState = {
